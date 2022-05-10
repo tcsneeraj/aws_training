@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'AWS CloudFormation Sample Template to create S3 bucket, EC2 instance, Security group'
+
+Parameters:
+  EC2InstanceType:
+    Description: EC2 instance type
+    Type: String
+    AllowedValues: [t2.nano, t2.micro, t2.small]
+    Default: t2.micro
+
+  EC2AmiId:
+    Type: String
+    Default: 'ami-0971b4b88a87adeef'
+    
+  Param1:
+    Type: String
+
+Resources:
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: 'my-test-bucket-cfn'
+      Tags: 
+        - Key: 'team_name'
+          Value: 'team_1'
+          
+  MyEC2SG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: 'my-sg-cfn'
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: '10.0.0.0/8'
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      #InstanceType: 't2.micro'
+      InstanceType: !Ref EC2InstanceType
+      ImageId: !Ref EC2AmiId
+      SecurityGroups: [ !Ref MyEC2SG ]
+
+Outputs:
+    MyEC2InstanceId:
+        Description: Instance Id of newly created EC2 instance
+        Value: !Ref MyEC2Instance
+        
+    MyEC2SGId:
+        Description: Security group Id.
+        Value: !GetAtt MyEC2SG.GroupId
